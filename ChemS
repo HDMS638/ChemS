@@ -1,0 +1,211 @@
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() {
+  runApp(const ChemistryApp());
+}
+
+class ChemistryApp extends StatelessWidget {
+  const ChemistryApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'ChemS',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+        scaffoldBackgroundColor: const Color(0xFFF9F9F9),
+        useMaterial3: true,
+      ),
+      home: const ChemistryHomePage(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class ChemistryHomePage extends StatefulWidget {
+  const ChemistryHomePage({super.key});
+
+  @override
+  State<ChemistryHomePage> createState() => _ChemistryHomePageState();
+}
+
+class _ChemistryHomePageState extends State<ChemistryHomePage> {
+  final TextEditingController _controller = TextEditingController();
+  Map<String, dynamic>? _chemicalData;
+  bool _isLoading = false;
+
+  Future<void> _searchChemical() async {
+    final query = _controller.text.trim();
+    if (query.isEmpty) {
+      print('⛔️ 검색어 없음');
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _chemicalData = null;
+    });
+
+    try {
+      print('🔍 1단계: 검색 시작 - $query');
+
+      final cidUrl = Uri.parse(
+        'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/$query/cids/JSON',
+      );
+      final cidResponse = await http.get(cidUrl);
+
+      print('📡 CID 응답 코드: ${cidResponse.statusCode}');
+      print('📦 CID 응답 내용: ${cidResponse.body}');
+
+      if (cidResponse.statusCode == 200) {
+        final cidData = json.decode(cidResponse.body);
+        final cids = cidData['IdentifierList']?['CID'];
+
+        if (cids != null && cids.isNotEmpty) {
+          final cid = cids[0];
+          print('✅ CID 확인됨: $cid');
+
+          final propUrl = Uri.parse(
+            'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/$cid/property/Title,MolecularFormula,MolecularWeight/JSON',
+          );
+          final propResponse = await http.get(propUrl);
+
+          print('📡 속성 응답 코드: ${propResponse.statusCode}');
+          print('📦 속성 응답 내용: ${propResponse.body}');
+
+          if (propResponse.statusCode == 200) {
+            final propData = json.decode(propResponse.body);
+            final props = propData['PropertyTable']['Properties'][0];
+
+            setState(() {
+              _chemicalData = props;
+              _isLoading = false;
+            });
+
+            print('✅ 정보 저장 완료');
+            return;
+          }
+        } else {
+          print('❌ CID 없음');
+        }
+      } else {
+        print('❌ CID 요청 실패: ${cidResponse.statusCode}');
+      }
+    } catch (e) {
+      print('❌ 예외 발생: $e');
+    }
+
+    setState(() {
+      _chemicalData = null;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ChemS', style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _controller,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.search),
+                labelText: '화학식 또는 이름 입력 (예: H2O, glucose)',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                filled: true,
+                fillColor: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _searchChemical,
+                icon: const Icon(Icons.science),
+                label: const Text('검색', style: TextStyle(fontSize: 18)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _chemicalData == null
+                  ? const Center(
+                child: Text(
+                  '검색 결과가 없습니다.',
+                  style: TextStyle(fontSize: 18),
+                ),
+              )
+                  : ChemicalInfoCard(data: _chemicalData!),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ChemicalInfoCard extends StatelessWidget {
+  final Map<String, dynamic> data;
+
+  const ChemicalInfoCard({super.key, required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.teal.shade50,
+      elevation: 6,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: ListView(
+          children: [
+            _infoRow('🧪 이름', data['Title']),
+            _infoRow('⚗️ 분자식', _formatFormula(data['MolecularFormula'])),
+            _infoRow('⚖️ 분자량', '${data['MolecularWeight']} g/mol'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoRow(String label, String? value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+          Expanded(
+            child: Text(value ?? '정보 없음', style: const TextStyle(fontSize: 16)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatFormula(String? formula) {
+    if (formula == null) return '정보 없음';
+    const subscript = {
+      '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
+      '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
+    };
+    return formula.replaceAllMapped(RegExp(r'\d'), (match) => subscript[match.group(0)] ?? match.group(0)!);
+  }
+}
+  
