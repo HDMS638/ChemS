@@ -38,10 +38,7 @@ class _ChemistryHomePageState extends State<ChemistryHomePage> {
 
   Future<void> _searchChemical() async {
     final query = _controller.text.trim();
-    if (query.isEmpty) {
-      print('⛔️ 검색어 없음');
-      return;
-    }
+    if (query.isEmpty) return;
 
     setState(() {
       _isLoading = true;
@@ -49,15 +46,10 @@ class _ChemistryHomePageState extends State<ChemistryHomePage> {
     });
 
     try {
-      print('🔍 1단계: 검색 시작 - $query');
-
       final cidUrl = Uri.parse(
         'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/$query/cids/JSON',
       );
       final cidResponse = await http.get(cidUrl);
-
-      print('📡 CID 응답 코드: ${cidResponse.statusCode}');
-      print('📦 CID 응답 내용: ${cidResponse.body}');
 
       if (cidResponse.statusCode == 200) {
         final cidData = json.decode(cidResponse.body);
@@ -65,36 +57,65 @@ class _ChemistryHomePageState extends State<ChemistryHomePage> {
 
         if (cids != null && cids.isNotEmpty) {
           final cid = cids[0];
-          print('✅ CID 확인됨: $cid');
 
           final propUrl = Uri.parse(
             'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/$cid/property/Title,MolecularFormula,MolecularWeight/JSON',
           );
           final propResponse = await http.get(propUrl);
 
-          print('📡 속성 응답 코드: ${propResponse.statusCode}');
-          print('📦 속성 응답 내용: ${propResponse.body}');
-
           if (propResponse.statusCode == 200) {
             final propData = json.decode(propResponse.body);
             final props = propData['PropertyTable']['Properties'][0];
+
+            // Get extra properties from PUG View
+            final viewUrl = Uri.parse(
+              'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/$cid/JSON',
+            );
+            final viewResponse = await http.get(viewUrl);
+
+            if (viewResponse.statusCode == 200) {
+              final viewData = json.decode(viewResponse.body);
+              final sections = viewData['Record']['Section'] as List<dynamic>;
+
+              String? extractValue(List<dynamic> sections, String heading) {
+                for (final section in sections) {
+                  if (section['TOCHeading'] == 'Experimental Properties') {
+                    for (final sub in section['Section'] ?? []) {
+                      if (sub['TOCHeading'] == heading) {
+                        final info = sub['Information']?[0]?['Value'];
+                        if (info == null) return null;
+
+                        if (info['StringWithMarkup'] != null) {
+                          return info['StringWithMarkup'][0]['String'];
+                        }
+                        if (info['Number'] != null) {
+                          return info['Number'][0].toString();
+                        }
+                      }
+                    }
+                  } else if (section['Section'] != null) {
+                    final result = extractValue(section['Section'], heading);
+                    if (result != null) return result;
+                  }
+                }
+                return null;
+              }
+
+              props['MeltingPoint'] = extractValue(sections, 'Melting Point');
+              props['BoilingPoint'] = extractValue(sections, 'Boiling Point');
+              props['Density'] = extractValue(sections, 'Density');
+            }
 
             setState(() {
               _chemicalData = props;
               _isLoading = false;
             });
-
-            print('✅ 정보 저장 완료');
             return;
           }
-        } else {
-          print('❌ CID 없음');
         }
-      } else {
-        print('❌ CID 요청 실패: ${cidResponse.statusCode}');
       }
     } catch (e) {
-      print('❌ 예외 발생: $e');
+      print('에러 발생: $e');
     }
 
     setState(() {
@@ -146,12 +167,7 @@ class _ChemistryHomePageState extends State<ChemistryHomePage> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : _chemicalData == null
-                  ? const Center(
-                child: Text(
-                  '검색 결과가 없습니다.',
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
+                  ? const Center(child: Text('검색 결과가 없습니다.', style: TextStyle(fontSize: 18)))
                   : ChemicalInfoCard(data: _chemicalData!),
             ),
           ],
@@ -179,6 +195,9 @@ class ChemicalInfoCard extends StatelessWidget {
             _infoRow('🧪 이름', data['Title']),
             _infoRow('⚗️ 분자식', _formatFormula(data['MolecularFormula'])),
             _infoRow('⚖️ 분자량', '${data['MolecularWeight']} g/mol'),
+            _infoRow('❄️ 녹는점', data['MeltingPoint']),
+            _infoRow('🔥 끓는점', data['BoilingPoint']),
+            _infoRow('🧊 밀도', data['Density']),
           ],
         ),
       ),
@@ -191,9 +210,7 @@ class ChemicalInfoCard extends StatelessWidget {
       child: Row(
         children: [
           SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-          Expanded(
-            child: Text(value ?? '정보 없음', style: const TextStyle(fontSize: 16)),
-          ),
+          Expanded(child: Text(value ?? '정보 없음', style: const TextStyle(fontSize: 16))),
         ],
       ),
     );
@@ -205,7 +222,6 @@ class ChemicalInfoCard extends StatelessWidget {
       '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄',
       '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉',
     };
-    return formula.replaceAllMapped(RegExp(r'\d'), (match) => subscript[match.group(0)] ?? match.group(0)!);
+    return formula.replaceAllMapped(RegExp(r'\\d'), (match) => subscript[match.group(0)] ?? match.group(0)!);
   }
 }
-  
