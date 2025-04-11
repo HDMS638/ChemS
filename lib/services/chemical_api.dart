@@ -1,5 +1,6 @@
 // lib/services/chemical_api.dart
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 Future<Map<String, dynamic>?> fetchChemicalInfo(String query) async {
@@ -7,8 +8,8 @@ Future<Map<String, dynamic>?> fetchChemicalInfo(String query) async {
     'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/$query/cids/JSON',
   );
 
+  if (kDebugMode) print('CID 검색 요청: $cidUrl');
   final cidResponse = await http.get(cidUrl);
-  print('CID 검색 요청: $cidUrl');
 
   if (cidResponse.statusCode == 200) {
     final cidData = json.decode(cidResponse.body);
@@ -16,7 +17,7 @@ Future<Map<String, dynamic>?> fetchChemicalInfo(String query) async {
 
     if (cids != null && cids.isNotEmpty) {
       final cid = cids[0];
-      print('✅ CID: $cid');
+      if (kDebugMode) print('✅ CID: $cid');
 
       final propUrl = Uri.parse(
         'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/$cid/property/Title,MolecularFormula,MolecularWeight/JSON',
@@ -30,8 +31,8 @@ Future<Map<String, dynamic>?> fetchChemicalInfo(String query) async {
         final viewUrl = Uri.parse(
           'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/$cid/JSON',
         );
+        if (kDebugMode) print('PUG View 요청: $viewUrl');
         final viewResponse = await http.get(viewUrl);
-        print('PUG View 요청: $viewUrl');
 
         if (viewResponse.statusCode == 200) {
           final viewData = json.decode(viewResponse.body);
@@ -111,12 +112,13 @@ Future<String?> fetchWikipediaProperty(String query, String propertyName) async 
   final url = Uri.parse('https://en.wikipedia.org/api/rest_v1/page/summary/$query');
   final response = await http.get(url);
 
-  print('📘 Wikipedia 요청: $url');
+  if (kDebugMode) print('📘 Wikipedia 요청: $url');
 
   if (response.statusCode == 200) {
     final data = jsonDecode(response.body);
     final extract = data['extract'] as String;
-    print('📘 Wikipedia 응답 내용:\n$extract');
+
+    if (kDebugMode) print('📘 Wikipedia 응답 내용:\n$extract');
 
     final regexMap = {
       'Density': RegExp(r'Density[:\s]*([0-9.]+)\s*g/cm'),
@@ -126,7 +128,7 @@ Future<String?> fetchWikipediaProperty(String query, String propertyName) async 
 
     final match = regexMap[propertyName]?.firstMatch(extract);
     if (match != null) {
-      print('📘 Wikipedia 매칭된 $propertyName: ${match.group(1)}');
+      if (kDebugMode) print('📘 Wikipedia 매칭된 $propertyName: ${match.group(1)}');
       return '${match.group(1)} °C';
     }
   }

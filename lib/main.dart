@@ -2,29 +2,30 @@ import 'package:chems/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'pages/camera_page.dart';
 import 'pages/search_page.dart';
-import 'pages/home_page.dart';
 import 'pages/favorites_page.dart';
 import 'pages/settings_page.dart';
 
 void main() => runApp(ChemSApp());
 
 class ChemSApp extends StatelessWidget {
+  const ChemSApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'ChemS',
       theme: ThemeData(primarySwatch: Colors.indigo),
-      home: MainScreen(),
+      home: const MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
   @override
-  _MainScreenState createState() => _MainScreenState();
+  MainScreenState createState() => MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 2;
 
   final List<Widget> _pages = [
@@ -51,7 +52,7 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         selectedItemColor: Colors.indigo,
-        unselectedItemColor: Colors.indigo.withOpacity(0.3),
+        unselectedItemColor: Colors.indigo.withAlpha((0.3 * 255).toInt()),
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: ''),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
