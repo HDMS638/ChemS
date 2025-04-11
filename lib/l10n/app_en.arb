@@ -1,0 +1,20 @@
+{
+  "@@locale": "en",
+  "appTitle": "ChemS",
+  "settings": "Settings",
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "fontSize": "Font Size",
+  "sendFeedback": "Send Feedback",
+  "aboutApp": "About App",
+  "searchHint": "Enter a formula",
+  "searchResult": "Search Result",
+  "noResult": "No results found.",
+  "name": "Name",
+  "molecularFormula": "Formula",
+  "molecularWeight": "Molecular Weight",
+  "meltingPoint": "Melting Point",
+  "boilingPoint": "Boiling Point",
+  "density": "Density",
+  "noInfo": "No info"
+}
