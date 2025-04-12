@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:chems/services/ocr_service.dart';
+import 'package:chems/utils/chemical_extractor.dart'; // 화학식 추출 유틸
 import 'search_result_page.dart';
 
 class CameraPage extends StatefulWidget {
@@ -39,12 +40,24 @@ class _CameraPageState extends State<CameraPage> {
       await _initializeControllerFuture;
       final imageFile = await _controller.takePicture();
       final inputImage = InputImage.fromFilePath(imageFile.path);
-      final text = await OcrService.recognizeTextFromImage(inputImage);
+      final rawText = await OcrService.recognizeTextFromImage(inputImage);
+
+      print('📸 OCR 인식 결과: $rawText');
+
+      final formula = extractChemicalFormula(rawText);
+      print('🧪 추출된 화학식: $formula');
+
+      if (formula.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('화학식을 인식하지 못했습니다')),
+        );
+        return;
+      }
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => SearchResultPage(query: text),
+          builder: (_) => SearchResultPage(query: formula),
         ),
       );
     } catch (e) {
