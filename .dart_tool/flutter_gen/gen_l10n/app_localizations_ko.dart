@@ -18,7 +18,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get darkMode => '다크 모드';
 
   @override
-  String get language => '언어 설정';
+  String get language => '언어';
 
   @override
   String get fontSize => '글꼴 크기';
@@ -36,13 +36,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get searchResult => '검색 결과';
 
   @override
-  String get noResult => '결과를 찾을 수 없습니다.';
+  String get noResult => '결과가 없습니다.';
 
   @override
   String get name => '이름';
 
   @override
-  String get molecularFormula => '분자식';
+  String get molecularFormula => '화학식';
 
   @override
   String get molecularWeight => '분자량';

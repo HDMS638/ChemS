@@ -6,8 +6,10 @@
 // @dart = 3.7
 
 import 'dart:io'; // flutter_ignore: dart_io_import.
+import 'package:camera_android_camerax/camera_android_camerax.dart';
 import 'package:shared_preferences_android/shared_preferences_android.dart';
 import 'package:url_launcher_android/url_launcher_android.dart';
+import 'package:camera_avfoundation/camera_avfoundation.dart';
 import 'package:shared_preferences_foundation/shared_preferences_foundation.dart';
 import 'package:url_launcher_ios/url_launcher_ios.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -28,6 +30,15 @@ class _PluginRegistrant {
   static void register() {
     if (Platform.isAndroid) {
       try {
+        AndroidCameraCameraX.registerWith();
+      } catch (err) {
+        print(
+          '`camera_android_camerax` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
+      try {
         SharedPreferencesAndroid.registerWith();
       } catch (err) {
         print(
@@ -46,6 +57,15 @@ class _PluginRegistrant {
       }
 
     } else if (Platform.isIOS) {
+      try {
+        AVFoundationCamera.registerWith();
+      } catch (err) {
+        print(
+          '`camera_avfoundation` threw an error: $err. '
+          'The app may not function as expected until you remove this plugin from pubspec.yaml'
+        );
+      }
+
       try {
         SharedPreferencesFoundation.registerWith();
       } catch (err) {

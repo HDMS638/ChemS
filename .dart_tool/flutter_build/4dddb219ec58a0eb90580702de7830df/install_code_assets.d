@@ -1,0 +1,1 @@
+ C:\\Users\\dongj\\StudioProjects\\ChemS_clone\\.dart_tool\\flutter_build\\4dddb219ec58a0eb90580702de7830df\\native_assets.json: 
