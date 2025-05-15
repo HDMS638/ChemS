@@ -6,7 +6,7 @@ import 'package:chems/providers/locale_provider.dart';
 import 'package:chems/providers/theme_provider.dart';
 import 'providers/font_provider.dart';
 import 'pages/camera_page.dart';
-import 'pages/search_page.dart';
+import 'pages/information_page.dart';
 import 'pages/favorites_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/home_page.dart';
@@ -88,7 +88,7 @@ class MainScreenState extends State<MainScreen> {
 
   final List<Widget> _pages = [
     CameraPage(),
-    SearchPage(),
+    InformationPage(),
     HomePage(),
     FavoritesPage(),
     SettingsPage(),

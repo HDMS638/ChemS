@@ -16,5 +16,9 @@
   "meltingPoint": "녹는점",
   "boilingPoint": "끓는점",
   "density": "밀도",
-  "noInfo": "정보 없음"
+  "noInfo": "정보 없음",
+  "addToFavorites": "즐겨찾기에 추가",
+  "addedToFavorites": "즐겨찾기에 추가되었습니다!",
+  "favorites": "즐겨찾기",
+  "noFavorites": "즐겨찾기가 비어 있습니다."
 }

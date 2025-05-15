@@ -16,5 +16,9 @@
   "meltingPoint": "Melting Point",
   "boilingPoint": "Boiling Point",
   "density": "Density",
-  "noInfo": "No info"
+  "noInfo": "No info",
+  "addToFavorites": "Add to Favorites",
+  "addedToFavorites": "Added to Favorites!",
+  "favorites": "Favorites",
+  "noFavorites": "No favorites yet."
 }

@@ -58,4 +58,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noInfo => '정보 없음';
+
+  @override
+  String get addToFavorites => '즐겨찾기에 추가';
+
+  @override
+  String get addedToFavorites => '즐겨찾기에 추가되었습니다!';
+
+  @override
+  String get favorites => '즐겨찾기';
+
+  @override
+  String get noFavorites => '즐겨찾기가 비어 있습니다.';
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:chems/services/chemical_api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../models/favorite_item.dart';
+import '../services/favorite_service.dart';
 
 class SearchResultPage extends StatefulWidget {
   final String query;
@@ -44,6 +46,27 @@ class _SearchResultPageState extends State<SearchResultPage> {
           _infoRow('❄️ ${local.meltingPoint}', _addUnit(data!['MeltingPoint'], '°C')),
           _infoRow('🔥 ${local.boilingPoint}', _addUnit(data!['BoilingPoint'], '°C')),
           _infoRow('🧊 ${local.density}', _addUnit(data!['Density'], 'g/cm³')),
+
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: () async {
+              await FavoriteService.addFavorite(FavoriteItem(
+                name: data!['Title'] ?? 'Unknown',
+                title: data!['Title'] ?? 'Unknown',
+                formula: data!['MolecularFormula'] ?? '',
+              ));
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(local.addedToFavorites)),
+              );
+            },
+            icon: const Icon(Icons.favorite, color: Colors.white),
+            label: Text(local.addToFavorites),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.indigo,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
+          ),
         ],
       ),
     );
@@ -56,8 +79,16 @@ class _SearchResultPageState extends State<SearchResultPage> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(child: Text(value ?? local.noInfo)),
+          SizedBox(
+            width: 100,
+            child: Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: Text(value ?? local.noInfo),
+          ),
         ],
       ),
     );

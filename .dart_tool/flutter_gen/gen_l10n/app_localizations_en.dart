@@ -58,4 +58,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noInfo => 'No info';
+
+  @override
+  String get addToFavorites => 'Add to Favorites';
+
+  @override
+  String get addedToFavorites => 'Added to Favorites!';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get noFavorites => 'No favorites yet.';
 }
