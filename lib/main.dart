@@ -10,6 +10,7 @@ import 'pages/information_page.dart';
 import 'pages/favorites_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/home_page.dart';
+import 'package:chems/providers/search_history_provider.dart';
 
 void main() {
   runApp(
@@ -18,6 +19,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
         ChangeNotifierProvider(create: (_) => FontProvider()),
+        ChangeNotifierProvider(create: (_) => SearchHistoryProvider()),
       ],
       child: const ChemSApp(),
     ),
@@ -37,7 +39,7 @@ class ChemSApp extends StatelessWidget {
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
-            textScaleFactor: fontProvider.fontScale,
+            textScaler: TextScaler.linear(fontProvider.fontScale),
           ),
           child: child!,
         );

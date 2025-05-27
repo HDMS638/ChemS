@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/favorite_item.dart';
+import 'dart:developer';
 
 class FavoriteService {
   static const _key = 'favorites';
@@ -39,7 +40,7 @@ class FavoriteService {
         return [];
       }
     } catch (e) {
-      print('❌ 즐겨찾기 로드 오류: $e');
+      log('❌ 즐겨찾기 로드 오류: $e', name: 'FavoriteService');
       return [];
     }
   }

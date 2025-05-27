@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../providers/theme_provider.dart';
@@ -8,13 +9,42 @@ import '../providers/locale_provider.dart';
 import '../providers/font_provider.dart';
 import '../utils/email_launcher.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _isHistoryEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadHistorySetting();
+  }
+
+  Future<void> _loadHistorySetting() async {
+    final prefs = await SharedPreferences.getInstance();
+    final enabled = prefs.getBool('saveSearchHistory') ?? true;
+    setState(() {
+      _isHistoryEnabled = enabled;
+    });
+  }
+
+  Future<void> _toggleHistory(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('saveSearchHistory', value);
+    setState(() {
+      _isHistoryEnabled = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final fontProvider = Provider.of<FontProvider>(context); // ✅ 폰트 provider
+    final fontProvider = Provider.of<FontProvider>(context);
     final local = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -25,9 +55,7 @@ class SettingsPage extends StatelessWidget {
           SwitchListTile(
             title: Text(local.darkMode),
             value: themeProvider.isDarkMode,
-            onChanged: (value) {
-              themeProvider.toggleTheme(value);
-            },
+            onChanged: themeProvider.toggleTheme,
           ),
 
           const Divider(thickness: 1, height: 32),
@@ -89,15 +117,22 @@ class SettingsPage extends StatelessWidget {
                         max: 1.5,
                         divisions: 7,
                         label: fontProvider.fontScale.toStringAsFixed(1),
-                        onChanged: (value) {
-                          fontProvider.setFontScale(value);
-                        },
+                        onChanged: fontProvider.setFontScale,
                       ),
                     ],
                   ),
                 ),
               );
             },
+          ),
+
+          const Divider(thickness: 1, height: 32),
+
+          // 📜 검색기록 저장 여부
+          SwitchListTile(
+            title: const Text("검색기록 저장"),
+            value: _isHistoryEnabled,
+            onChanged: _toggleHistory,
           ),
 
           const Divider(thickness: 1, height: 32),

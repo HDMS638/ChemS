@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:chems/services/ocr_service.dart';
-import 'package:chems/utils/chemical_extractor.dart'; // 화학식 추출 유틸
+import 'package:chems/utils/chemical_extractor.dart';
 import 'search_result_page.dart';
 
 class CameraPage extends StatefulWidget {
@@ -42,10 +42,12 @@ class _CameraPageState extends State<CameraPage> {
       final inputImage = InputImage.fromFilePath(imageFile.path);
       final rawText = await OcrService.recognizeTextFromImage(inputImage);
 
-      print('📸 OCR 인식 결과: $rawText');
+      debugPrint('📸 OCR 인식 결과: $rawText');
 
       final formula = extractChemicalFormula(rawText);
-      print('🧪 추출된 화학식: $formula');
+      debugPrint('🧪 추출된 화학식: $formula');
+
+      if (!mounted) return;
 
       if (formula.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -61,7 +63,8 @@ class _CameraPageState extends State<CameraPage> {
         ),
       );
     } catch (e) {
-      print('❌ 오류 발생: $e');
+      debugPrint('❌ 오류 발생: $e');
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('텍스트 인식 실패')),
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:chems/services/chemical_api.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/favorite_item.dart';
 import '../services/favorite_service.dart';
 
@@ -19,11 +20,27 @@ class _SearchResultPageState extends State<SearchResultPage> {
   @override
   void initState() {
     super.initState();
-    fetchChemicalInfoWithFallback(widget.query).then((result) {
-      setState(() {
-        data = result;
-        isLoading = false;
-      });
+    _loadDataAndStoreHistory();
+  }
+
+  Future<void> _loadDataAndStoreHistory() async {
+    final result = await fetchChemicalInfoWithFallback(widget.query);
+
+    // 🔐 검색 기록 저장 옵션이 켜져 있다면 기록 저장
+    final prefs = await SharedPreferences.getInstance();
+    final shouldSave = prefs.getBool('saveSearchHistory') ?? true;
+
+    if (shouldSave) {
+      List<String> history = prefs.getStringList('searchHistory') ?? [];
+      if (!history.contains(widget.query)) {
+        history.add(widget.query);
+        await prefs.setStringList('searchHistory', history);
+      }
+    }
+
+    setState(() {
+      data = result;
+      isLoading = false;
     });
   }
 
@@ -55,6 +72,9 @@ class _SearchResultPageState extends State<SearchResultPage> {
                 title: data!['Title'] ?? 'Unknown',
                 formula: data!['MolecularFormula'] ?? '',
               ));
+
+              if (!context.mounted) return;
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(local.addedToFavorites)),
               );

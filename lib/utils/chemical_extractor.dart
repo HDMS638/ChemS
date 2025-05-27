@@ -1,4 +1,4 @@
-// lib/utils/chemical_extractor.dart
+import 'package:flutter/foundation.dart'; // kDebugMode 사용
 
 /// OCR 인식 텍스트를 보정 (문자 대체, 특수문자 제거 등)
 String fixOcrText(String text) {
@@ -19,7 +19,9 @@ String extractChemicalFormula(String rawText) {
   for (final line in lines) {
     final cleaned = fixOcrText(line);
     if (regex.hasMatch(cleaned)) {
-      print('🧪 추출된 화학식 후보: $cleaned');
+      if (kDebugMode) {
+        print('🧪 추출된 화학식 후보: $cleaned');
+      }
       return cleaned;
     }
   }
