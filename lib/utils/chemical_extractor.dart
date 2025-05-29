@@ -1,30 +1,29 @@
-import 'package:flutter/foundation.dart'; // kDebugMode 사용
+String extractChemicalFormula(String raw) {
+  // 1) 아래첨자 → 일반 숫자 매핑
+  const Map<String, String> sub2normal = {
+    '₀': '0',
+    '₁': '1',
+    '₂': '2',
+    '₃': '3',
+    '₄': '4',
+    '₅': '5',
+    '₆': '6',
+    '₇': '7',
+    '₈': '8',
+    '₉': '9',
+  };
 
-/// OCR 인식 텍스트를 보정 (문자 대체, 특수문자 제거 등)
-String fixOcrText(String text) {
-  return text
-      .replaceAll('0', 'O') // 숫자 0 → 대문자 O
-      .replaceAll('1', 'I') // 숫자 1 → 대문자 I
-      .replaceAll(RegExp(r'[^\w]'), '') // 특수문자 제거 (단어 문자만 남김)
-      .toUpperCase(); // 대문자로 통일
-}
+  // 2) 모든 아래첨자를 대응하는 일반 숫자로 치환
+  raw = raw.replaceAllMapped(
+    RegExp(sub2normal.keys.map(RegExp.escape).join('|')),
+        (m) => sub2normal[m[0]]!,
+  );
 
-/// OCR 결과에서 화학식 후보를 추출
-String extractChemicalFormula(String rawText) {
-  final lines = rawText.split('\n');
+  // 3) 화학식 패턴 매칭 (예: H2O, C6H12O6, Fe2O3 등)
+  final regex = RegExp(r'([A-Z][a-z]?)(\d*)');
+  final matches = regex.allMatches(raw);
 
-  // 간단한 화학식 후보 정규표현식: 대문자+숫자 (길이 제한: 2~6자)
-  final regex = RegExp(r'^[A-Z][A-Z0-9]{1,5}$');
-
-  for (final line in lines) {
-    final cleaned = fixOcrText(line);
-    if (regex.hasMatch(cleaned)) {
-      if (kDebugMode) {
-        print('🧪 추출된 화학식 후보: $cleaned');
-      }
-      return cleaned;
-    }
-  }
-
-  return ''; // 추출된 화학식이 없을 경우
+  // 4) 매칭된 부분만 이어붙여서 최종 화학식 반환
+  if (matches.isEmpty) return '';
+  return matches.map((m) => m.group(0)).join();
 }

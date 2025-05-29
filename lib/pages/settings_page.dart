@@ -22,10 +22,10 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    _loadHistorySetting();
+    _loadSettings();
   }
 
-  Future<void> _loadHistorySetting() async {
+  Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     final enabled = prefs.getBool('saveSearchHistory') ?? true;
     setState(() {
@@ -51,7 +51,6 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(title: Text(local.settings)),
       body: ListView(
         children: [
-          // 🌙 다크 모드 설정
           SwitchListTile(
             title: Text(local.darkMode),
             value: themeProvider.isDarkMode,
@@ -60,7 +59,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // 🌐 언어 설정
           ListTile(
             title: Text(local.language),
             trailing: const Icon(Icons.language),
@@ -97,7 +95,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // 🔠 글꼴 크기 조절
           ListTile(
             title: Text(local.fontSize),
             trailing: const Icon(Icons.format_size),
@@ -128,7 +125,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // 📜 검색기록 저장 여부
+          // 검색 기록 저장 스위치
           SwitchListTile(
             title: const Text("검색기록 저장"),
             value: _isHistoryEnabled,
@@ -137,7 +134,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // 📬 피드백 보내기
           ListTile(
             title: Text(local.sendFeedback),
             trailing: const Icon(Icons.mail_outline),
@@ -152,7 +148,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // ℹ️ 앱 정보
           ListTile(
             title: Text(local.aboutApp),
             trailing: const Icon(Icons.info_outline),

@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:chems/services/ocr_service.dart';
 import 'package:chems/utils/chemical_extractor.dart';
 import 'search_result_page.dart';
@@ -14,19 +15,19 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
   late CameraController _controller;
-  late Future<void> _initializeControllerFuture;
+  Future<void>? _initializeControllerFuture; // nullable로 수정
 
   @override
   void initState() {
     super.initState();
-    _initCamera();
+    _initializeCamera();
   }
 
-  Future<void> _initCamera() async {
+  Future<void> _initializeCamera() async {
     final cameras = await availableCameras();
-    _controller = CameraController(cameras[0], ResolutionPreset.medium);
+    _controller = CameraController(cameras.first, ResolutionPreset.medium);
     _initializeControllerFuture = _controller.initialize();
-    setState(() {});
+    setState(() {}); // 다시 build 호출
   }
 
   @override
@@ -37,18 +38,16 @@ class _CameraPageState extends State<CameraPage> {
 
   Future<void> _captureAndRecognizeText() async {
     try {
+      if (_initializeControllerFuture == null) return;
       await _initializeControllerFuture;
-      final imageFile = await _controller.takePicture();
-      final inputImage = InputImage.fromFilePath(imageFile.path);
-      final rawText = await OcrService.recognizeTextFromImage(inputImage);
+      final picture = await _controller.takePicture();
+      final rawText = await OcrService.runOCR(File(picture.path));
 
-      debugPrint('📸 OCR 인식 결과: $rawText');
-
+      debugPrint('📸 OCR 결과: $rawText');
       final formula = extractChemicalFormula(rawText);
       debugPrint('🧪 추출된 화학식: $formula');
 
       if (!mounted) return;
-
       if (formula.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('화학식을 인식하지 못했습니다')),
@@ -58,9 +57,7 @@ class _CameraPageState extends State<CameraPage> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => SearchResultPage(query: formula),
-        ),
+        MaterialPageRoute(builder: (_) => SearchResultPage(query: formula)),
       );
     } catch (e) {
       debugPrint('❌ 오류 발생: $e');
@@ -73,14 +70,23 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_initializeControllerFuture == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
-      body: FutureBuilder(
+      extendBody: true, // 하단 네비게이션에 겹치지 않게
+      body: FutureBuilder<void>(
         future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
+        builder: (context, snap) {
+          if (snap.connectionState == ConnectionState.done) {
             return Stack(
               children: [
                 CameraPreview(_controller),
+
+                // 가이드 박스
                 Center(
                   child: Container(
                     width: 250,
@@ -91,23 +97,10 @@ class _CameraPageState extends State<CameraPage> {
                     ),
                   ),
                 ),
+
+                // 촬영 버튼
                 Positioned(
-                  bottom: 120,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Text(
-                      '가이드라인 안에 화학식을 맞춰주세요',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        backgroundColor: Colors.black54,
-                      ),
-                    ),
-                  ),
-                ),
-                Positioned(
-                  bottom: 40,
+                  bottom: 100,
                   left: 0,
                   right: 0,
                   child: Center(
@@ -119,19 +112,25 @@ class _CameraPageState extends State<CameraPage> {
                         style: TextStyle(color: Colors.white),
                       ),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         backgroundColor: Colors.indigo,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ],
             );
-          } else if (snapshot.hasError) {
-            return Center(child: Text('카메라 오류 발생: ${snapshot.error}'));
-          } else {
-            return const Center(child: CircularProgressIndicator());
           }
+
+          if (snap.hasError) {
+            return Center(child: Text('카메라 오류 발생: ${snap.error}'));
+          }
+
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );
