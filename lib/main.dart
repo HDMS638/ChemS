@@ -113,11 +113,41 @@ class MainScreenState extends State<MainScreen> {
         selectedItemColor: Colors.indigo,
         unselectedItemColor: Colors.indigo.withAlpha((0.3 * 255).toInt()),
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(top: 10.0), // 👇 아이콘 아래로 내리기
+              child: Icon(Icons.camera_alt),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Icon(Icons.search),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Icon(Icons.home),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Icon(Icons.favorite),
+            ),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Padding(
+              padding: EdgeInsets.only(top: 10.0),
+              child: Icon(Icons.settings),
+            ),
+            label: '',
+          ),
         ],
       ),
     );

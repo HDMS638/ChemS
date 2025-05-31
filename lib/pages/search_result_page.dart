@@ -4,6 +4,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/favorite_item.dart';
 import '../services/favorite_service.dart';
+import '../utils/chemical_formatter.dart';
+import '../utils/unit_formatter.dart';
 
 class SearchResultPage extends StatefulWidget {
   final String query;
@@ -26,7 +28,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
   Future<void> _loadDataAndStoreHistory() async {
     final result = await fetchChemicalInfoWithFallback(widget.query);
 
-    // 🔐 검색 기록 저장 옵션이 켜져 있다면 기록 저장
     final prefs = await SharedPreferences.getInstance();
     final shouldSave = prefs.getBool('saveSearchHistory') ?? true;
 
@@ -40,6 +41,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     setState(() {
       data = result;
+
+      // ✅ 디버깅용 로그 추가
+      print('🔬 원본 화학식: ${data?['MolecularFormula']}');
+      print('🧪 정렬된 화학식: ${formatFormula(data?['MolecularFormula'] ?? '')}');
+
       isLoading = false;
     });
   }
@@ -58,11 +64,11 @@ class _SearchResultPageState extends State<SearchResultPage> {
         padding: const EdgeInsets.all(20),
         children: [
           _infoRow('🧪 ${local.name}', data!['Title']),
-          _infoRow('⚗️ ${local.molecularFormula}', data!['MolecularFormula']),
+          _infoRow('⚗️ ${local.molecularFormula}', formatFormula(data!['MolecularFormula'] ?? '')),
           _infoRow('⚖️ ${local.molecularWeight}', '${data!['MolecularWeight']} g/mol'),
-          _infoRow('❄️ ${local.meltingPoint}', _addUnit(data!['MeltingPoint'], '°C')),
-          _infoRow('🔥 ${local.boilingPoint}', _addUnit(data!['BoilingPoint'], '°C')),
-          _infoRow('🧊 ${local.density}', _addUnit(data!['Density'], 'g/cm³')),
+          _infoRow('❄️ ${local.meltingPoint}', addTemperatureUnit(data!['MeltingPoint'])),
+          _infoRow('🔥 ${local.boilingPoint}', addTemperatureUnit(data!['BoilingPoint'])),
+          _infoRow('🧊 ${local.density}', addDensityUnit(data!['Density'])),
 
           const SizedBox(height: 20),
           ElevatedButton.icon(
@@ -70,7 +76,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
               await FavoriteService.addFavorite(FavoriteItem(
                 name: data!['Title'] ?? 'Unknown',
                 title: data!['Title'] ?? 'Unknown',
-                formula: data!['MolecularFormula'] ?? '',
+                formula: formatFormula(data!['MolecularFormula'] ?? ''), // ✅ 관용 표기로 저장
               ));
 
               if (!context.mounted) return;
@@ -112,13 +118,5 @@ class _SearchResultPageState extends State<SearchResultPage> {
         ],
       ),
     );
-  }
-
-  String? _addUnit(String? value, String unit) {
-    if (value == null || value.isEmpty) return null;
-    if (value.contains(unit) || value.contains(RegExp(r'[a-zA-Z%]'))) {
-      return value;
-    }
-    return '$value $unit';
   }
 }

@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:chems/services/ocr_service.dart';
@@ -15,7 +14,7 @@ class CameraPage extends StatefulWidget {
 
 class _CameraPageState extends State<CameraPage> {
   late CameraController _controller;
-  Future<void>? _initializeControllerFuture; // nullable로 수정
+  Future<void>? _initializeControllerFuture;
 
   @override
   void initState() {
@@ -27,7 +26,7 @@ class _CameraPageState extends State<CameraPage> {
     final cameras = await availableCameras();
     _controller = CameraController(cameras.first, ResolutionPreset.medium);
     _initializeControllerFuture = _controller.initialize();
-    setState(() {}); // 다시 build 호출
+    setState(() {});
   }
 
   @override
@@ -77,16 +76,19 @@ class _CameraPageState extends State<CameraPage> {
     }
 
     return Scaffold(
-      extendBody: true, // 하단 네비게이션에 겹치지 않게
+      extendBodyBehindAppBar: true, // 상단바 뒤까지 확장
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.done) {
             return Stack(
               children: [
-                CameraPreview(_controller),
+                // 카메라 전체 확장
+                Positioned.fill(
+                  child: CameraPreview(_controller),
+                ),
 
-                // 가이드 박스
+                // 가운데 가이드 박스
                 Center(
                   child: Container(
                     width: 250,
@@ -100,7 +102,7 @@ class _CameraPageState extends State<CameraPage> {
 
                 // 촬영 버튼
                 Positioned(
-                  bottom: 100,
+                  bottom: MediaQuery.of(context).padding.bottom + 60,
                   left: 0,
                   right: 0,
                   child: Center(
