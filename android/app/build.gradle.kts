@@ -1,9 +1,7 @@
-// File: android/app/build.gradle.kts
-
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    // Flutter Gradle Plugin
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -37,11 +35,19 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debug") // 실제 배포 시 release로 교체 필요
         }
     }
 }
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // ML Kit Text Recognition – Extra Language Support
+    implementation("com.google.mlkit:text-recognition-korean:16.0.0")
+    implementation("com.google.mlkit:text-recognition-japanese:16.0.0")
+    implementation("com.google.mlkit:text-recognition-chinese:16.0.0")
+    implementation("com.google.mlkit:text-recognition-devanagari:16.0.0")
 }

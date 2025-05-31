@@ -19,9 +19,3 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
-
-# Keep ML Kit Text Recognition classes
--keep class com.google.mlkit.vision.text.** { *; }
-
--keep class com.google.mlkit.** { *; }
--keep class com.google.firebase.** { *; }
