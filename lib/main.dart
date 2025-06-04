@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+
+// Providers
 import 'package:chems/providers/locale_provider.dart';
 import 'package:chems/providers/theme_provider.dart';
-import 'providers/font_provider.dart';
+import 'package:chems/providers/font_provider.dart';
+import 'package:chems/providers/search_history_provider.dart';
+
+// Pages
 import 'pages/camera_page.dart';
 import 'pages/information_page.dart';
 import 'pages/favorites_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/home_page.dart';
-import 'package:chems/providers/search_history_provider.dart';
 
 void main() {
   runApp(
@@ -36,6 +40,7 @@ class ChemSApp extends StatelessWidget {
     final fontProvider = Provider.of<FontProvider>(context);
 
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       builder: (context, child) {
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(
@@ -88,7 +93,7 @@ class MainScreen extends StatefulWidget {
 class MainScreenState extends State<MainScreen> {
   int _selectedIndex = 2;
 
-  final List<Widget> _pages = [
+  final List<Widget> _pages = const [
     CameraPage(),
     InformationPage(),
     HomePage(),
@@ -113,41 +118,11 @@ class MainScreenState extends State<MainScreen> {
         selectedItemColor: Colors.indigo,
         unselectedItemColor: Colors.indigo.withAlpha((0.3 * 255).toInt()),
         items: const [
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 10.0), // 👇 아이콘 아래로 내리기
-              child: Icon(Icons.camera_alt),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Icon(Icons.search),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Icon(Icons.home),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Icon(Icons.favorite),
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 10.0),
-              child: Icon(Icons.settings),
-            ),
-            label: '',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
         ],
       ),
     );

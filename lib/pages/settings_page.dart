@@ -17,7 +17,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool _isHistoryEnabled = true;
+  bool? _isHistoryEnabled;
+  bool _isLoading = true;
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final enabled = prefs.getBool('saveSearchHistory') ?? true;
     setState(() {
       _isHistoryEnabled = enabled;
+      _isLoading = false;
     });
   }
 
@@ -46,6 +48,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final fontProvider = Provider.of<FontProvider>(context);
     final local = AppLocalizations.of(context)!;
+
+    if (_isLoading) {
+      // 👇 깜빡임 제거를 위해 완전히 비워진 Scaffold 사용
+      return const Scaffold();
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(local.settings)),
@@ -125,12 +132,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
           const Divider(thickness: 1, height: 32),
 
-          // 검색 기록 저장 스위치
-          SwitchListTile(
-            title: const Text("검색기록 저장"),
-            value: _isHistoryEnabled,
-            onChanged: _toggleHistory,
-          ),
+          if (_isHistoryEnabled != null)
+            SwitchListTile(
+              title: const Text("검색기록 저장"),
+              value: _isHistoryEnabled!,
+              onChanged: _toggleHistory,
+            ),
 
           const Divider(thickness: 1, height: 32),
 
