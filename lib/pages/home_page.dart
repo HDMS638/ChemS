@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // ✅ 기존 검색기록은 항상 보여주기
   Future<void> _loadSearchHistory() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -32,9 +33,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // ✅ 정확한 문자열 비교를 위해 trim() 사용 + 리스트 재할당
   Future<void> _deleteTerm(String term) async {
     final prefs = await SharedPreferences.getInstance();
-    _searchHistory.remove(term);
+
+    _searchHistory =
+        _searchHistory.where((t) => t.trim() != term.trim()).toList();
+
     await prefs.setStringList('searchHistory', _searchHistory);
     setState(() {});
   }
@@ -45,12 +50,19 @@ class _HomePageState extends State<HomePage> {
     setState(() => _searchHistory.clear());
   }
 
+  // ✅ 스위치 상태에 따라 검색기록 저장
   void _onSearch(String query) async {
     if (query.trim().isEmpty) return;
+
     final prefs = await SharedPreferences.getInstance();
-    _searchHistory.remove(query);
-    _searchHistory.insert(0, query);
-    await prefs.setStringList('searchHistory', _searchHistory);
+    final isEnabled = prefs.getBool('saveSearchHistory') ?? true;
+
+    if (isEnabled) {
+      _searchHistory.removeWhere((item) => item.trim() == query.trim());
+      _searchHistory.insert(0, query.trim());
+      await prefs.setStringList('searchHistory', _searchHistory);
+    }
+
     _controller.clear();
     _focusNode.unfocus();
     setState(() => _showHistory = false);

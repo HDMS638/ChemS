@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:chems/services/ocr_service.dart';
 import 'package:chems/utils/chemical_extractor.dart';
+import '../services/gemini.dart';
 import 'search_result_page.dart';
 
 class CameraPage extends StatefulWidget {
@@ -40,7 +41,8 @@ class _CameraPageState extends State<CameraPage> {
       if (_initializeControllerFuture == null) return;
       await _initializeControllerFuture;
       final picture = await _controller.takePicture();
-      final rawText = await OcrService.runOCR(File(picture.path));
+      //final rawText = await OcrService.runOCR(File(picture.path));
+      final rawText = await GeminiOCR.toGemini(File(picture.path));
 
       debugPrint('📸 OCR 결과: $rawText');
       final formula = extractChemicalFormula(rawText);
