@@ -70,4 +70,70 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get noFavorites => '즐겨찾기가 비어 있습니다.';
+
+  @override
+  String get recentSearches => '최근 검색어';
+
+  @override
+  String get clearAll => '전체삭제';
+
+  @override
+  String get alkaliMetal => '알칼리 금속';
+
+  @override
+  String get alkalineEarthMetal => '알칼리 토금속';
+
+  @override
+  String get transitionMetal => '전이 금속';
+
+  @override
+  String get postTransitionMetal => '전이후 금속';
+
+  @override
+  String get metalloid => '준금속';
+
+  @override
+  String get nonmetal => '비금속';
+
+  @override
+  String get halogen => '할로겐';
+
+  @override
+  String get nobleGas => '비활성 기체';
+
+  @override
+  String get lanthanide => '란타넘족';
+
+  @override
+  String get actinide => '악티늄족';
+
+  @override
+  String get hydrogen => '수소';
+
+  @override
+  String get helium => '헬륨';
+
+  @override
+  String get selectElement => '원소를 선택하세요';
+
+  @override
+  String get toggleColorScheme => '색상 기준 교체';
+
+  @override
+  String get atomicNumber => '원자 번호';
+
+  @override
+  String get symbol => '기호';
+
+  @override
+  String get atomicMass => '원자 질량';
+
+  @override
+  String get category => '분류';
+
+  @override
+  String get group => '족(Group)';
+
+  @override
+  String get period => '주기(Period)';
 }

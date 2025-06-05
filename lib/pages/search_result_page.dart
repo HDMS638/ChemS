@@ -19,33 +19,33 @@ class _SearchResultPageState extends State<SearchResultPage> {
   Map<String, dynamic>? data;
   bool isLoading = true;
 
+  late final String standardizedFormula;
+
   @override
   void initState() {
     super.initState();
+    standardizedFormula = capitalizeFormula(widget.query); // ✅ 보정
     _loadDataAndStoreHistory();
   }
 
   Future<void> _loadDataAndStoreHistory() async {
-    final result = await fetchChemicalInfoWithFallback(widget.query);
+    final result = await fetchChemicalInfoWithFallback(standardizedFormula.toLowerCase());
 
     final prefs = await SharedPreferences.getInstance();
     final shouldSave = prefs.getBool('saveSearchHistory') ?? true;
 
     if (shouldSave) {
       List<String> history = prefs.getStringList('searchHistory') ?? [];
-      if (!history.contains(widget.query)) {
-        history.add(widget.query);
+      final lowerHistory = history.map((e) => e.toLowerCase()).toList();
+
+      if (!lowerHistory.contains(standardizedFormula.toLowerCase())) {
+        history.add(standardizedFormula);
         await prefs.setStringList('searchHistory', history);
       }
     }
 
     setState(() {
       data = result;
-
-      // ✅ 디버깅용 로그 추가
-      print('🔬 원본 화학식: ${data?['MolecularFormula']}');
-      print('🧪 정렬된 화학식: ${formatFormula(data?['MolecularFormula'] ?? '')}');
-
       isLoading = false;
     });
   }
@@ -64,7 +64,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
         padding: const EdgeInsets.all(20),
         children: [
           _infoRow('🧪 ${local.name}', data!['Title']),
-          _infoRow('⚗️ ${local.molecularFormula}', formatFormula(data!['MolecularFormula'] ?? '')),
+          _infoRow('⚗️ ${local.molecularFormula}', standardizedFormula), // ✅ 정규화된 화학식 사용
           _infoRow('⚖️ ${local.molecularWeight}', '${data!['MolecularWeight']} g/mol'),
           _infoRow('❄️ ${local.meltingPoint}', addTemperatureUnit(data!['MeltingPoint'])),
           _infoRow('🔥 ${local.boilingPoint}', addTemperatureUnit(data!['BoilingPoint'])),
@@ -76,7 +76,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
               await FavoriteService.addFavorite(FavoriteItem(
                 name: data!['Title'] ?? 'Unknown',
                 title: data!['Title'] ?? 'Unknown',
-                formula: formatFormula(data!['MolecularFormula'] ?? ''), // ✅ 관용 표기로 저장
+                formula: standardizedFormula, // ✅ 정규화된 값 저장
               ));
 
               if (!context.mounted) return;

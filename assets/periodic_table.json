@@ -976,7 +976,7 @@
     "symbol": "Mt",
     "atomicNumber": 109,
     "atomicMass": 278.0,
-    "category": "Unknown",
+    "category": "Transition Metal",
     "group": 9,
     "period": 7
   },
@@ -985,7 +985,7 @@
     "symbol": "Ds",
     "atomicNumber": 110,
     "atomicMass": 281.0,
-    "category": "Unknown",
+    "category": "Transition Metal",
     "group": 10,
     "period": 7
   },
@@ -994,7 +994,7 @@
     "symbol": "Rg",
     "atomicNumber": 111,
     "atomicMass": 282.0,
-    "category": "Unknown",
+    "category": "Transition Metal",
     "group": 11,
     "period": 7
   },
@@ -1003,7 +1003,7 @@
     "symbol": "Cn",
     "atomicNumber": 112,
     "atomicMass": 285.0,
-    "category": "Unknown",
+    "category": "Transition Metal",
     "group": 12,
     "period": 7
   },
@@ -1012,7 +1012,7 @@
     "symbol": "Nh",
     "atomicNumber": 113,
     "atomicMass": 286.0,
-    "category": "Unknown",
+    "category": "Post-transition Metal",
     "group": 13,
     "period": 7
   },
@@ -1021,7 +1021,7 @@
     "symbol": "Fl",
     "atomicNumber": 114,
     "atomicMass": 289.0,
-    "category": "Unknown",
+    "category": "Post-transition Metal",
     "group": 14,
     "period": 7
   },
@@ -1030,7 +1030,7 @@
     "symbol": "Mc",
     "atomicNumber": 115,
     "atomicMass": 290.0,
-    "category": "Unknown",
+    "category": "Post-transition Metal",
     "group": 15,
     "period": 7
   },
@@ -1039,7 +1039,7 @@
     "symbol": "Lv",
     "atomicNumber": 116,
     "atomicMass": 293.0,
-    "category": "Unknown",
+    "category": "Post-transition Metal",
     "group": 16,
     "period": 7
   },
@@ -1048,7 +1048,7 @@
     "symbol": "Ts",
     "atomicNumber": 117,
     "atomicMass": 294.0,
-    "category": "Unknown",
+    "category": "Halogen",
     "group": 17,
     "period": 7
   },
@@ -1057,7 +1057,7 @@
     "symbol": "Og",
     "atomicNumber": 118,
     "atomicMass": 294.0,
-    "category": "Unknown",
+    "category": "Noble Gas",
     "group": 18,
     "period": 7
   }

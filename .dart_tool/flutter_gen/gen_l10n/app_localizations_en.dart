@@ -70,4 +70,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noFavorites => 'No favorites yet.';
+
+  @override
+  String get recentSearches => 'Recent Searches';
+
+  @override
+  String get clearAll => 'Clear All';
+
+  @override
+  String get alkaliMetal => 'Alkali Metal';
+
+  @override
+  String get alkalineEarthMetal => 'Alkaline Earth Metal';
+
+  @override
+  String get transitionMetal => 'Transition Metal';
+
+  @override
+  String get postTransitionMetal => 'Post-Transition Metal';
+
+  @override
+  String get metalloid => 'Metalloid';
+
+  @override
+  String get nonmetal => 'Nonmetal';
+
+  @override
+  String get halogen => 'Halogen';
+
+  @override
+  String get nobleGas => 'Noble Gas';
+
+  @override
+  String get lanthanide => 'Lanthanide';
+
+  @override
+  String get actinide => 'Actinide';
+
+  @override
+  String get hydrogen => 'Hydrogen';
+
+  @override
+  String get helium => 'Helium';
+
+  @override
+  String get selectElement => 'Select an Element';
+
+  @override
+  String get toggleColorScheme => 'Toggle Color Scheme';
+
+  @override
+  String get atomicNumber => 'Atomic Number';
+
+  @override
+  String get symbol => 'Symbol';
+
+  @override
+  String get atomicMass => 'Atomic Mass';
+
+  @override
+  String get category => 'Category';
+
+  @override
+  String get group => 'Group';
+
+  @override
+  String get period => 'Period';
 }

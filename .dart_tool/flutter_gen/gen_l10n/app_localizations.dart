@@ -220,6 +220,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No favorites yet.'**
   String get noFavorites;
+
+  /// No description provided for @recentSearches.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Searches'**
+  String get recentSearches;
+
+  /// No description provided for @clearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All'**
+  String get clearAll;
+
+  /// No description provided for @alkaliMetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Alkali Metal'**
+  String get alkaliMetal;
+
+  /// No description provided for @alkalineEarthMetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Alkaline Earth Metal'**
+  String get alkalineEarthMetal;
+
+  /// No description provided for @transitionMetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Transition Metal'**
+  String get transitionMetal;
+
+  /// No description provided for @postTransitionMetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Post-Transition Metal'**
+  String get postTransitionMetal;
+
+  /// No description provided for @metalloid.
+  ///
+  /// In en, this message translates to:
+  /// **'Metalloid'**
+  String get metalloid;
+
+  /// No description provided for @nonmetal.
+  ///
+  /// In en, this message translates to:
+  /// **'Nonmetal'**
+  String get nonmetal;
+
+  /// No description provided for @halogen.
+  ///
+  /// In en, this message translates to:
+  /// **'Halogen'**
+  String get halogen;
+
+  /// No description provided for @nobleGas.
+  ///
+  /// In en, this message translates to:
+  /// **'Noble Gas'**
+  String get nobleGas;
+
+  /// No description provided for @lanthanide.
+  ///
+  /// In en, this message translates to:
+  /// **'Lanthanide'**
+  String get lanthanide;
+
+  /// No description provided for @actinide.
+  ///
+  /// In en, this message translates to:
+  /// **'Actinide'**
+  String get actinide;
+
+  /// No description provided for @hydrogen.
+  ///
+  /// In en, this message translates to:
+  /// **'Hydrogen'**
+  String get hydrogen;
+
+  /// No description provided for @helium.
+  ///
+  /// In en, this message translates to:
+  /// **'Helium'**
+  String get helium;
+
+  /// No description provided for @selectElement.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an Element'**
+  String get selectElement;
+
+  /// No description provided for @toggleColorScheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle Color Scheme'**
+  String get toggleColorScheme;
+
+  /// No description provided for @atomicNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Atomic Number'**
+  String get atomicNumber;
+
+  /// No description provided for @symbol.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbol'**
+  String get symbol;
+
+  /// No description provided for @atomicMass.
+  ///
+  /// In en, this message translates to:
+  /// **'Atomic Mass'**
+  String get atomicMass;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @group.
+  ///
+  /// In en, this message translates to:
+  /// **'Group'**
+  String get group;
+
+  /// No description provided for @period.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get period;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

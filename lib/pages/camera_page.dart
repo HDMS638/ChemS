@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:chems/services/ocr_service.dart';
 import 'package:chems/utils/chemical_extractor.dart';
 import '../services/gemini.dart';
 import 'search_result_page.dart';
