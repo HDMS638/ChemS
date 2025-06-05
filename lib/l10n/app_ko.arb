@@ -42,5 +42,6 @@
   "atomicMass": "원자 질량",
   "category": "분류",
   "group": "족(Group)",
-  "period": "주기(Period)"
+  "period": "주기(Period)",
+  "saveSearchHistory": "검색기록 저장"
 }

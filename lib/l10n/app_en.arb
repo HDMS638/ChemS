@@ -42,5 +42,6 @@
   "atomicMass": "Atomic Mass",
   "category": "Category",
   "group": "Group",
-  "period": "Period"
+  "period": "Period",
+  "saveSearchHistory": "Save Search History"
 }

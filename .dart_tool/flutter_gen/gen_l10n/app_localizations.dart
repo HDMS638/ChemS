@@ -352,6 +352,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Period'**
   String get period;
+
+  /// No description provided for @saveSearchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Search History'**
+  String get saveSearchHistory;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

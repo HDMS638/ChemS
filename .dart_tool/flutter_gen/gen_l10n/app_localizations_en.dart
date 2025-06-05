@@ -136,4 +136,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get period => 'Period';
+
+  @override
+  String get saveSearchHistory => 'Save Search History';
 }

@@ -136,4 +136,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get period => '주기(Period)';
+
+  @override
+  String get saveSearchHistory => '검색기록 저장';
 }

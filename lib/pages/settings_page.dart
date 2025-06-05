@@ -134,7 +134,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           if (_isHistoryEnabled != null)
             SwitchListTile(
-              title: const Text("검색기록 저장"),
+              title: Text(local.saveSearchHistory), // ✅ 다국어 적용
               value: _isHistoryEnabled!,
               onChanged: _toggleHistory,
             ),
