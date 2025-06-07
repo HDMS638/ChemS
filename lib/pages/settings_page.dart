@@ -50,7 +50,6 @@ class _SettingsPageState extends State<SettingsPage> {
     final local = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      // 👇 깜빡임 제거를 위해 완전히 비워진 Scaffold 사용
       return const Scaffold();
     }
 
@@ -134,7 +133,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
           if (_isHistoryEnabled != null)
             SwitchListTile(
-              title: Text(local.saveSearchHistory), // ✅ 다국어 적용
+              title: Text(local.saveSearchHistory),
               value: _isHistoryEnabled!,
               onChanged: _toggleHistory,
             ),
@@ -165,7 +164,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 applicationName: info.appName,
                 applicationVersion: info.version,
                 applicationIcon: const Icon(Icons.science),
-                applicationLegalese: '© 2025 ChemS',
+                applicationLegalese:
+                '© 2025 ChemS\n정보 출처: PubChem, Wikipedia',
               );
             },
           ),

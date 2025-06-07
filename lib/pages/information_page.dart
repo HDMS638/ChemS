@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import '../models/element_model.dart';
 import '../services/element_service.dart';
@@ -22,40 +21,41 @@ class _InformationPageState extends State<InformationPage> {
   }
 
   Color getColorForElement(ElementModel element) {
+    final category = element.category['en']?.toLowerCase() ?? '';
     return useInternationalScheme
-        ? internationalColor(element.category)
-        : domesticColor(element.category);
+        ? internationalColor(category)
+        : domesticColor(category);
   }
 
   Color internationalColor(String category) {
-    switch (category.toLowerCase()) {
+    switch (category) {
       case 'alkali metal':
-        return Colors.orange.shade600;
+        return Colors.red.shade100;
       case 'alkaline earth metal':
-        return Colors.red.shade700;
+        return Colors.deepPurple.shade50;
       case 'transition metal':
-        return Colors.purple.shade900;
+        return Colors.blue.shade100;
       case 'post-transition metal':
-        return Colors.green.shade900;
+        return Colors.greenAccent.shade100;
       case 'metalloid':
-        return Colors.green.shade300;
+        return Colors.lightGreen.shade100;
       case 'nonmetal':
-        return Colors.grey.shade600;
+        return Colors.yellow.shade100;
       case 'halogen':
-        return Colors.lightBlue.shade300;
+        return Colors.lightBlue.shade100;
       case 'noble gas':
-        return Colors.lightBlue.shade900;
+        return Colors.orange.shade100;
       case 'lanthanide':
-        return Colors.blue.shade900;
+        return Colors.cyan.shade100;
       case 'actinide':
-        return Colors.amberAccent;
+        return Colors.tealAccent.shade100;
       default:
         return Colors.grey.shade200;
     }
   }
 
   Color domesticColor(String category) {
-    switch (category.toLowerCase()) {
+    switch (category) {
       case 'metal':
       case 'transition metal':
       case 'alkali metal':
@@ -63,13 +63,13 @@ class _InformationPageState extends State<InformationPage> {
       case 'post-transition metal':
       case 'lanthanide':
       case 'actinide':
-        return Colors.blue.shade400;
+        return Colors.lightBlue.shade100;
       case 'metalloid':
-        return Colors.amber.shade300;
+        return Colors.lime.shade200;
       case 'nonmetal':
       case 'halogen':
       case 'noble gas':
-        return Colors.red.shade400;
+        return Colors.red.shade100;
       default:
         return Colors.grey.shade200;
     }
@@ -99,14 +99,14 @@ class _InformationPageState extends State<InformationPage> {
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
             Text(
               '${element.atomicNumber}',
               style: const TextStyle(
                 fontSize: 12,
-                color: Colors.white,
+                color: Colors.black,
               ),
             ),
           ],
@@ -126,23 +126,23 @@ class _InformationPageState extends State<InformationPage> {
     );
   }
 
-  Widget buildLegendRow() {
+  Widget buildLegendRow(String locale) {
     final items = useInternationalScheme
         ? [
-            legendItem(color: Colors.orange.shade600, label: '알칼리 금속'),
-            legendItem(color: Colors.red.shade700, label: '알칼리 토금속'),
-            legendItem(color: Colors.purple.shade900, label: '전이 금속'),
-            legendItem(color: Colors.green.shade900, label: '전이후 금속'),
-            legendItem(color: Colors.green.shade300, label: '준금속'),
-            legendItem(color: Colors.grey.shade600, label: '비금속'),
-            legendItem(color: Colors.lightBlue.shade300, label: '할로겐'),
-            legendItem(color: Colors.lightBlue.shade900, label: '비활성 기체'),
-          ]
+      legendItem(color: Colors.red.shade100, label: locale == 'ko' ? '알칼리 금속' : 'Alkali Metal'),
+      legendItem(color: Colors.deepPurple.shade50, label: locale == 'ko' ? '알칼리 토금속' : 'Alkaline Earth Metal'),
+      legendItem(color: Colors.blue.shade100, label: locale == 'ko' ? '전이 금속' : 'Transition Metal'),
+      legendItem(color: Colors.greenAccent.shade100, label: locale == 'ko' ? '전이후 금속' : 'Post-transition Metal'),
+      legendItem(color: Colors.lightGreen.shade100, label: locale == 'ko' ? '준금속' : 'Metalloid'),
+      legendItem(color: Colors.yellow.shade100, label: locale == 'ko' ? '비금속' : 'Nonmetal'),
+      legendItem(color: Colors.lightBlue.shade100, label: locale == 'ko' ? '할로겐' : 'Halogen'),
+      legendItem(color: Colors.orange.shade100, label: locale == 'ko' ? '비활성 기체' : 'Noble Gas'),
+    ]
         : [
-            legendItem(color: Colors.blue.shade400, label: '금속'),
-            legendItem(color: Colors.amber.shade300, label: '준금속'),
-            legendItem(color: Colors.red.shade400, label: '비금속'),
-          ];
+      legendItem(color: Colors.lightBlue.shade100, label: locale == 'ko' ? '금속' : 'Metal'),
+      legendItem(color: Colors.lime.shade200, label: locale == 'ko' ? '준금속' : 'Metalloid'),
+      legendItem(color: Colors.red.shade100, label: locale == 'ko' ? '비금속' : 'Nonmetal'),
+    ];
 
     return Padding(
       padding: const EdgeInsets.all(8),
@@ -157,12 +157,14 @@ class _InformationPageState extends State<InformationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context).languageCode;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
           (_selectedElement != null && !_selectedElement!.isEmpty)
-              ? '${_selectedElement!.name} (${_selectedElement!.symbol})'
-              : '원소를 선택하세요',
+              ? '${_selectedElement!.name[locale] ?? _selectedElement!.name['en']} (${_selectedElement!.symbol})'
+              : (locale == 'ko' ? '원소를 선택하세요' : 'Select an element'),
         ),
         actions: [
           IconButton(
@@ -187,19 +189,15 @@ class _InformationPageState extends State<InformationPage> {
           }
 
           final elements = snapshot.data!;
-          final lanthanides = elements
-              .where((e) => e.atomicNumber >= 57 && e.atomicNumber <= 71)
-              .toList();
-          final actinides = elements
-              .where((e) => e.atomicNumber >= 89 && e.atomicNumber <= 103)
-              .toList();
+          final lanthanides = elements.where((e) => e.atomicNumber >= 57 && e.atomicNumber <= 71).toList();
+          final actinides = elements.where((e) => e.atomicNumber >= 89 && e.atomicNumber <= 103).toList();
 
           return SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildLegendRow(),
+                buildLegendRow(locale),
                 const Divider(),
                 if (_selectedElement != null && !_selectedElement!.isEmpty)
                   Padding(
@@ -207,12 +205,21 @@ class _InformationPageState extends State<InformationPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('원자 번호: ${_selectedElement!.atomicNumber}', style: const TextStyle(fontSize: 16)),
-                        Text('기호: ${_selectedElement!.symbol}', style: const TextStyle(fontSize: 16)),
-                        Text('원자 질량: ${_selectedElement!.atomicMass}', style: const TextStyle(fontSize: 16)),
-                        Text('분류: ${_selectedElement!.category}', style: const TextStyle(fontSize: 16)),
-                        Text('족(Group): ${_selectedElement!.group}', style: const TextStyle(fontSize: 16)),
-                        Text('주기(Period): ${_selectedElement!.period}', style: const TextStyle(fontSize: 16)),
+                        Text(locale == 'ko' ? '원자 번호: ${_selectedElement!.atomicNumber}' : 'Atomic Number: ${_selectedElement!.atomicNumber}',
+                            style: const TextStyle(fontSize: 16)),
+                        Text(locale == 'ko' ? '기호: ${_selectedElement!.symbol}' : 'Symbol: ${_selectedElement!.symbol}',
+                            style: const TextStyle(fontSize: 16)),
+                        Text(locale == 'ko' ? '원자 질량: ${_selectedElement!.atomicMass}' : 'Atomic Mass: ${_selectedElement!.atomicMass}',
+                            style: const TextStyle(fontSize: 16)),
+                        Text(
+                            locale == 'ko'
+                                ? '분류: ${_selectedElement!.category[locale] ?? _selectedElement!.category['en']}'
+                                : 'Category: ${_selectedElement!.category[locale] ?? _selectedElement!.category['en']}',
+                            style: const TextStyle(fontSize: 16)),
+                        Text(locale == 'ko' ? '족(Group): ${_selectedElement!.group}' : 'Group: ${_selectedElement!.group}',
+                            style: const TextStyle(fontSize: 16)),
+                        Text(locale == 'ko' ? '주기(Period): ${_selectedElement!.period}' : 'Period: ${_selectedElement!.period}',
+                            style: const TextStyle(fontSize: 16)),
                       ],
                     ),
                   ),
@@ -228,16 +235,14 @@ class _InformationPageState extends State<InformationPage> {
                         return TableRow(
                           children: List.generate(18, (group) {
                             final element = elements.firstWhere(
-                              (e) =>
-                                  e.period == period + 1 &&
+                                  (e) =>
+                              e.period == period + 1 &&
                                   e.group == group + 1 &&
                                   !(e.atomicNumber >= 57 && e.atomicNumber <= 71) &&
                                   !(e.atomicNumber >= 89 && e.atomicNumber <= 103),
                               orElse: () => ElementModel.empty(),
                             );
-                            return element.isEmpty
-                                ? const SizedBox(height: 60)
-                                : buildElementBox(element);
+                            return element.isEmpty ? const SizedBox(height: 60) : buildElementBox(element);
                           }),
                         );
                       }),
@@ -245,28 +250,26 @@ class _InformationPageState extends State<InformationPage> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text('란타넘족 (57–71)', style: TextStyle(fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text(locale == 'ko' ? '란타넘족 (57–71)' : 'Lanthanides (57–71)',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    children: lanthanides.map(buildElementBox).toList(),
-                  ),
+                  child: Row(children: lanthanides.map(buildElementBox).toList()),
                 ),
                 const SizedBox(height: 8),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
-                  child: Text('악티늄족 (89–103)', style: TextStyle(fontWeight: FontWeight.bold)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Text(locale == 'ko' ? '악티늄족 (89–103)' : 'Actinides (89–103)',
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
                 ),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                    children: actinides.map(buildElementBox).toList(),
-                  ),
+                  child: Row(children: actinides.map(buildElementBox).toList()),
                 ),
                 const SizedBox(height: 16),
               ],
