@@ -19,29 +19,31 @@ class _SearchResultPageState extends State<SearchResultPage> {
   Map<String, dynamic>? data;
   bool isLoading = true;
 
-  late final String standardizedFormula;
+  late final String displayFormula; // 관용 표기로 보여줄 화학식
+  late final String apiQuery;       // API 요청용 소문자 화학식
 
   @override
   void initState() {
     super.initState();
-    standardizedFormula = capitalizeFormula(widget.query); // ✅ 보정
+    displayFormula = capitalizeFormula(widget.query); // NaOH
+    apiQuery = widget.query.toLowerCase();            // naoh
     _loadDataAndStoreHistory();
   }
 
   Future<void> _loadDataAndStoreHistory() async {
-    final result = await fetchChemicalInfoWithFallback(standardizedFormula.toLowerCase());
+    final result = await fetchChemicalInfoWithFallback(apiQuery);
 
     final prefs = await SharedPreferences.getInstance();
     final shouldSave = prefs.getBool('saveSearchHistory') ?? true;
 
     if (shouldSave) {
       List<String> history = prefs.getStringList('searchHistory') ?? [];
-      final lowerHistory = history.map((e) => e.toLowerCase()).toList();
 
-      if (!lowerHistory.contains(standardizedFormula.toLowerCase())) {
-        history.add(standardizedFormula);
-        await prefs.setStringList('searchHistory', history);
-      }
+      // 중복 제거 후 최상단에 삽입
+      history.removeWhere((item) => capitalizeFormula(item).toLowerCase() == displayFormula.toLowerCase());
+      history.insert(0, displayFormula);
+
+      await prefs.setStringList('searchHistory', history);
     }
 
     setState(() {
@@ -64,23 +66,21 @@ class _SearchResultPageState extends State<SearchResultPage> {
         padding: const EdgeInsets.all(20),
         children: [
           _infoRow('🧪 ${local.name}', data!['Title']),
-          _infoRow('⚗️ ${local.molecularFormula}', standardizedFormula), // ✅ 정규화된 화학식 사용
+          _infoRow('⚗️ ${local.molecularFormula}', displayFormula),
           _infoRow('⚖️ ${local.molecularWeight}', '${data!['MolecularWeight']} g/mol'),
           _infoRow('❄️ ${local.meltingPoint}', addTemperatureUnit(data!['MeltingPoint'])),
           _infoRow('🔥 ${local.boilingPoint}', addTemperatureUnit(data!['BoilingPoint'])),
           _infoRow('🧊 ${local.density}', addDensityUnit(data!['Density'])),
-
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () async {
               await FavoriteService.addFavorite(FavoriteItem(
                 name: data!['Title'] ?? 'Unknown',
                 title: data!['Title'] ?? 'Unknown',
-                formula: standardizedFormula, // ✅ 정규화된 값 저장
+                formula: displayFormula,
               ));
 
               if (!context.mounted) return;
-
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(local.addedToFavorites)),
               );
@@ -100,7 +100,6 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
   Widget _infoRow(String label, String? value) {
     final local = AppLocalizations.of(context)!;
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
