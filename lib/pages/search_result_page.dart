@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/favorite_item.dart';
 import '../services/favorite_service.dart';
-import '../utils/chemical_formatter.dart';
+import '../utils/chemical_utils.dart';
 import '../utils/unit_formatter.dart';
 
 class SearchResultPage extends StatefulWidget {
@@ -38,11 +38,8 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     if (shouldSave) {
       List<String> history = prefs.getStringList('searchHistory') ?? [];
-
-      // 중복 제거 후 최상단에 삽입
       history.removeWhere((item) => capitalizeFormula(item).toLowerCase() == displayFormula.toLowerCase());
       history.insert(0, displayFormula);
-
       await prefs.setStringList('searchHistory', history);
     }
 
@@ -57,7 +54,7 @@ class _SearchResultPageState extends State<SearchResultPage> {
     final local = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(local.searchResult)),
+      appBar: AppBar(title: Text(displayFormula)),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : data == null
