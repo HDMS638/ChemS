@@ -16,7 +16,7 @@ class GeminiOCR {
       'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=$apiKey',
     );
 
-    final prompt = "화면 안의 화학식을 알려줘. 만약 여러개 잇으면 쉼표와 띄어쓰기로 구별해서 알려줘. 없으면 없다고 알려줘. 단답으로 알려줘. 첨자 없이 알려줘.";
+    final prompt = "화면 안의 화학식을 알려줘. 만약 화학식이 아니라 물질의 이름이라면 해당 물질의 화학식을 알려줘.만약 여러개 잇으면 쉼표와 띄어쓰기로 구별해서 알려줘. 없으면 없다고 알려줘. 단답으로 알려줘. 첨자 없이 알려줘.";
 
     final body = jsonEncode({
       "contents": [
