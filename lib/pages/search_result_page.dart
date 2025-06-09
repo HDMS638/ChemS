@@ -19,14 +19,16 @@ class _SearchResultPageState extends State<SearchResultPage> {
   Map<String, dynamic>? data;
   bool isLoading = true;
 
-  late final String displayFormula; // 관용 표기로 보여줄 화학식
-  late final String apiQuery;       // API 요청용 소문자 화학식
+  late final String displayFormula;
+  late final String apiQuery;
+
+  List<String> ghsPictograms = [];
 
   @override
   void initState() {
     super.initState();
-    displayFormula = capitalizeFormula(widget.query); // NaOH
-    apiQuery = widget.query.toLowerCase();            // naoh
+    displayFormula = capitalizeFormula(widget.query);
+    apiQuery = widget.query.toLowerCase();
     _loadDataAndStoreHistory();
   }
 
@@ -38,15 +40,71 @@ class _SearchResultPageState extends State<SearchResultPage> {
 
     if (shouldSave) {
       List<String> history = prefs.getStringList('searchHistory') ?? [];
-      history.removeWhere((item) => capitalizeFormula(item).toLowerCase() == displayFormula.toLowerCase());
+      history.removeWhere((item) =>
+      capitalizeFormula(item).toLowerCase() == displayFormula.toLowerCase());
       history.insert(0, displayFormula);
       await prefs.setStringList('searchHistory', history);
+    }
+
+    if (result != null && result['RawJson'] != null) {
+      ghsPictograms = extractGhsPictograms(result['RawJson']);
     }
 
     setState(() {
       data = result;
       isLoading = false;
     });
+  }
+
+  List<String> extractGhsPictograms(Map<String, dynamic> rawJson) {
+    final pictograms = <String>[];
+
+    void searchGHS(dynamic section) {
+      if (section is Map<String, dynamic>) {
+        if (section['TOCHeading'] == 'GHS Classification') {
+          final infoList = section['Information'] ?? [];
+          for (var info in infoList) {
+            final value = info['Value'];
+            if (value != null && value['ExternalDataURL'] != null) {
+              final url = value['ExternalDataURL'];
+              final name = _mapUrlToFileName(url);
+              if (name != null) pictograms.add(name);
+            } else if (value != null && value['StringWithMarkup'] != null) {
+              for (var item in value['StringWithMarkup']) {
+                final href = item['Markup']?[0]?['URL'];
+                final name = _mapUrlToFileName(href);
+                if (name != null) pictograms.add(name);
+              }
+            }
+          }
+        } else if (section.containsKey('Section')) {
+          for (var sub in section['Section']) {
+            searchGHS(sub);
+          }
+        }
+      } else if (section is List) {
+        for (var sub in section) {
+          searchGHS(sub);
+        }
+      }
+    }
+
+    searchGHS(rawJson['Record']['Section']);
+    return pictograms.toSet().toList();
+  }
+
+  String? _mapUrlToFileName(String? url) {
+    if (url == null) return null;
+    if (url.contains('GHS01')) return 'ghs_Exploding_Bomb';
+    if (url.contains('GHS02')) return 'ghs_flame';
+    if (url.contains('GHS03')) return 'ghs_flame_over_circle';
+    if (url.contains('GHS04')) return 'ghs_gas';
+    if (url.contains('GHS05')) return 'ghs_corrosion';
+    if (url.contains('GHS06')) return 'ghs_skull';
+    if (url.contains('GHS07')) return 'ghs_exclamation';
+    if (url.contains('GHS08')) return 'ghs_health_hazard';
+    if (url.contains('GHS09')) return 'ghs_environment';
+    return null;
   }
 
   @override
@@ -62,18 +120,36 @@ class _SearchResultPageState extends State<SearchResultPage> {
           : ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          _infoRow('🧪 ${local.name}', data!['Title']),
+          _infoRow('🧪 ${local.name}', data?['Title'] ?? 'Unknown'),
           _infoRow('⚗️ ${local.molecularFormula}', displayFormula),
-          _infoRow('⚖️ ${local.molecularWeight}', '${data!['MolecularWeight']} g/mol'),
-          _infoRow('❄️ ${local.meltingPoint}', addTemperatureUnit(data!['MeltingPoint'])),
-          _infoRow('🔥 ${local.boilingPoint}', addTemperatureUnit(data!['BoilingPoint'])),
-          _infoRow('🧊 ${local.density}', addDensityUnit(data!['Density'])),
+          _infoRow('⚖️ ${local.molecularWeight}', '${data?['MolecularWeight'] ?? 'Unknown'} g/mol'),
+          _infoRow('❄️ ${local.meltingPoint}', addTemperatureUnit(data?['MeltingPoint'])),
+          _infoRow('🔥 ${local.boilingPoint}', addTemperatureUnit(data?['BoilingPoint'])),
+          _infoRow('🧊 ${local.density}', addDensityUnit(data?['Density'])),
+          if (ghsPictograms.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            Text("☣️ GHS 라벨", style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: ghsPictograms.map((filename) {
+                return Image.asset(
+                  'assets/image/$filename.png',
+                  width: 64,
+                  height: 64,
+                  errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.error),
+                );
+              }).toList(),
+            ),
+          ],
           const SizedBox(height: 20),
           ElevatedButton.icon(
             onPressed: () async {
               await FavoriteService.addFavorite(FavoriteItem(
-                name: data!['Title'] ?? 'Unknown',
-                title: data!['Title'] ?? 'Unknown',
+                name: data?['Title'] ?? 'Unknown',
+                title: data?['Title'] ?? 'Unknown',
                 formula: displayFormula,
               ));
 

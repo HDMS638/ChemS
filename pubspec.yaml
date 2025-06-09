@@ -45,6 +45,7 @@ flutter:
   assets:
     - assets/icon/app_icon.png
     - assets/periodic_table.json
+    - assets/image/
 
 l10n:  # ✅ 이제는 flutter 블록 "밖에" 둡니다!
   arb-dir: lib/l10n

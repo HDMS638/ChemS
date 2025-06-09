@@ -1,136 +1,85 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-Future<Map<String, dynamic>?> fetchChemicalInfo(String query) async {
-  final cidUrl = Uri.parse(
+/// PubChem API로부터 CID를 가져옴
+Future<int?> fetchCID(String query) async {
+  final url = Uri.parse(
     'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/$query/cids/JSON',
   );
-
-  if (kDebugMode) print('CID 검색 요청: $cidUrl');
-  final cidResponse = await http.get(cidUrl);
-
-  if (cidResponse.statusCode == 200) {
-    final cidData = json.decode(cidResponse.body);
-    final cids = cidData['IdentifierList']?['CID'];
-
-    if (cids != null && cids.isNotEmpty) {
-      final cid = cids[0];
-      if (kDebugMode) print('✅ CID: $cid');
-
-      final propUrl = Uri.parse(
-        'https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/$cid/property/Title,MolecularFormula,MolecularWeight/JSON',
-      );
-      final propResponse = await http.get(propUrl);
-
-      if (propResponse.statusCode == 200) {
-        final propData = json.decode(propResponse.body);
-        final props = propData['PropertyTable']['Properties'][0];
-
-        final viewUrl = Uri.parse(
-          'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/$cid/JSON',
-        );
-        if (kDebugMode) print('PUG View 요청: $viewUrl');
-        final viewResponse = await http.get(viewUrl);
-
-        if (viewResponse.statusCode == 200) {
-          final viewData = json.decode(viewResponse.body);
-          final sections = viewData['Record']['Section'] as List<dynamic>;
-
-          String? extractValue(List<dynamic> sections, String heading) {
-            for (final section in sections) {
-              if (section['TOCHeading'] == 'Experimental Properties') {
-                for (final sub in section['Section'] ?? []) {
-                  if (sub['TOCHeading'] == heading) {
-                    final info = sub['Information']?[0]?['Value'];
-                    if (info == null) return null;
-
-                    if (info['StringWithMarkup'] != null) {
-                      String raw = info['StringWithMarkup'][0]['String'];
-                      if (heading == 'Melting Point' || heading == 'Boiling Point') {
-                        raw = _convertFahrenheitToCelsius(raw);
-                      }
-                      return raw;
-                    }
-
-                    if (info['Number'] != null) {
-                      return info['Number'][0].toString();
-                    }
-                  }
-                }
-              } else if (section['Section'] != null) {
-                final result = extractValue(section['Section'], heading);
-                if (result != null) return result;
-              }
-            }
-            return null;
-          }
-
-          props['MeltingPoint'] = extractValue(sections, 'Melting Point');
-          props['BoilingPoint'] = extractValue(sections, 'Boiling Point');
-          props['Density'] = extractValue(sections, 'Density');
-        }
-
-        return props;
-      }
-    }
-  }
-
-  return null;
-}
-
-String _convertFahrenheitToCelsius(String input) {
-  final regex = RegExp(r'([-+]?[0-9]*\.?[0-9]+)\s*°F');
-  final match = regex.firstMatch(input);
-  if (match != null) {
-    final fahrenheit = double.tryParse(match.group(1)!);
-    if (fahrenheit != null) {
-      final celsius = ((fahrenheit - 32) * 5 / 9).toStringAsFixed(1);
-      return '$celsius °C';
-    }
-  }
-  return input;
-}
-
-Future<Map<String, dynamic>?> fetchChemicalInfoWithFallback(String query) async {
-  final result = await fetchChemicalInfo(query);
-
-  if (result != null) {
-    for (final key in ['MeltingPoint', 'BoilingPoint', 'Density']) {
-      if (result[key] == null || result[key] == '정보 없음') {
-        final fallback = await fetchWikipediaProperty(query, key);
-        if (fallback != null) result[key] = fallback;
-      }
-    }
-  }
-
-  return result;
-}
-
-Future<String?> fetchWikipediaProperty(String query, String propertyName) async {
-  final url = Uri.parse('https://en.wikipedia.org/api/rest_v1/page/summary/$query');
   final response = await http.get(url);
 
-  if (kDebugMode) print('📘 Wikipedia 요청: $url');
-
   if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    final extract = data['extract'] as String;
-
-    if (kDebugMode) print('📘 Wikipedia 응답 내용:\n$extract');
-
-    final regexMap = {
-      'Density': RegExp(r'Density[:\s]*([0-9.]+)\s*g/cm'),
-      'MeltingPoint': RegExp(r'Melting point[:\s]*([-+]?[0-9.]+)\s*°?[CF]'),
-      'BoilingPoint': RegExp(r'Boiling point[:\s]*([-+]?[0-9.]+)\s*°?[CF]'),
-    };
-
-    final match = regexMap[propertyName]?.firstMatch(extract);
-    if (match != null) {
-      if (kDebugMode) print('📘 Wikipedia 매칭된 $propertyName: ${match.group(1)}');
-      return '${match.group(1)} °C';
+    final decoded = jsonDecode(response.body);
+    final cids = decoded['IdentifierList']?['CID'];
+    if (cids != null && cids.isNotEmpty) {
+      return cids[0];
     }
   }
-
   return null;
+}
+
+/// CID를 이용하여 상세 화학 물질 정보(JSON 포함) 가져옴
+Future<Map<String, dynamic>?> fetchChemicalInfoFromPubChem(int cid) async {
+  final url = Uri.parse(
+    'https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/$cid/JSON',
+  );
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    final decoded = jsonDecode(response.body);
+    return parseChemicalInfo(decoded);
+  }
+  return null;
+}
+
+/// PubChem JSON 구조에서 원하는 정보 추출 (재귀적 탐색 포함)
+Map<String, dynamic> parseChemicalInfo(Map<String, dynamic> json) {
+  String? searchValue(String heading, dynamic section) {
+    if (section is Map<String, dynamic>) {
+      if (section['TOCHeading'] == heading && section.containsKey('Information')) {
+        final info = section['Information'][0];
+        final value = info['Value'];
+        if (value.containsKey('StringWithMarkup')) {
+          return value['StringWithMarkup'][0]['String'];
+        } else if (value.containsKey('Number')) {
+          return value['Number'].toString();
+        }
+      }
+
+      if (section.containsKey('Section')) {
+        for (var sub in section['Section']) {
+          final result = searchValue(heading, sub);
+          if (result != null) return result;
+        }
+      }
+    } else if (section is List) {
+      for (var sub in section) {
+        final result = searchValue(heading, sub);
+        if (result != null) return result;
+      }
+    }
+
+    return null;
+  }
+
+  final record = json['Record'];
+  final sections = record['Section'];
+
+  return {
+    'Title': record['RecordTitle'] ?? 'Unknown', // ✅ 이름 직접 추출
+    'MolecularWeight': searchValue('Molecular Weight', sections) ?? 'Unknown',
+    'MeltingPoint': searchValue('Melting Point', sections) ?? 'Unknown',
+    'BoilingPoint': searchValue('Boiling Point', sections) ?? 'Unknown',
+    'Density': searchValue('Density', sections) ?? 'Unknown',
+    'RawJson': json,
+  };
+}
+
+/// 검색어 기반으로 PubChem에서 CID → 상세정보 추출 → 반환
+Future<Map<String, dynamic>?> fetchChemicalInfoWithFallback(String query) async {
+  final cid = await fetchCID(query);
+  if (cid == null) return null;
+
+  final info = await fetchChemicalInfoFromPubChem(cid);
+  return info;
 }
