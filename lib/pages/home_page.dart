@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/chemical_utils.dart';
+import '../services/gemini_text_analyzer.dart';
 import 'search_result_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -48,19 +49,24 @@ class _HomePageState extends State<HomePage> {
 
   void _onSearch(String query) async {
     if (query.trim().isEmpty) return;
-    final formatted = capitalizeFormula(query.trim());
+
+    final navigator = Navigator.of(context); // context 사용 전 백업
+
+    final interpreted = await GeminiTextAnalyzer.analyzeInput(query.trim());
+    final formatted = capitalizeFormula(interpreted);
 
     final prefs = await SharedPreferences.getInstance();
     _searchHistory.remove(formatted);
     _searchHistory.insert(0, formatted);
     await prefs.setStringList('searchHistory', _searchHistory);
 
+    if (!mounted) return;
+
     _controller.clear();
     _focusNode.unfocus();
     setState(() => _showHistory = false);
 
-    Navigator.push(
-      context,
+    navigator.push(
       MaterialPageRoute(
         builder: (context) => SearchResultPage(query: formatted),
       ),
@@ -112,7 +118,7 @@ class _HomePageState extends State<HomePage> {
                     const Text("최근 검색어", style: TextStyle(fontWeight: FontWeight.bold)),
                     TextButton(
                       onPressed: _clearAllHistory,
-                      child: const Text("전체삭제"),
+                      child: const Text("전체 삭제"),
                     )
                   ],
                 ),
